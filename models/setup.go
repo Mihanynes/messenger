@@ -38,9 +38,6 @@ func ConnectDataBase() {
 	}
 
 	DB.AutoMigrate(&User{})
-	DB.AutoMigrate(&Project{})
-	DB.AutoMigrate(&Task{})
-	DB.AutoMigrate(&Column{})
-	DB.AutoMigrate(&TextPoint{})
-	DB.AutoMigrate(&Section{})
+	DB.AutoMigrate(&Chat{})
+	DB.AutoMigrate(&Message{})
 }

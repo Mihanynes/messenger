@@ -17,7 +17,7 @@ type User struct {
 	Email     string `gorm:"size:255;not null;" json:"email"`
 	FirstName string `gorm:"size:255;not null;" json:"first_name"`
 	LastName  string `gorm:"size:255;not null;" json:"last_name"`
-	Projects  []Project
+	ImageSrc  string `gorm:"size:255;not null;default:avatars/default.jpg" json:"image_src"`
 }
 
 func GetUserByID(uid uint) (User, error) {
@@ -92,4 +92,15 @@ func (u *User) BeforeSave() error {
 
 	return nil
 
+}
+
+func FindUser(username string) ([]User, error) {
+
+	var users []User
+
+	if err := DB.Where("username LIKE ?", username+"%").Find(&users); err != nil {
+		return users, err.Error
+	}
+	// Убрать пароли у каждого юзера
+	return users, nil
 }

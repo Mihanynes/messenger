@@ -57,12 +57,11 @@ func Login(c *gin.Context) {
 }
 
 type RegisterInput struct {
-	Username  string           `json:"username" binding:"required"`
-	Password  string           `json:"password" binding:"required"`
-	Email     string           `json:"email" binding:"required"`
-	FirstName string           `json:"first_name" binding:"required"`
-	LastName  string           `json:"last_name" binding:"required"`
-	Projects  []models.Project `gorm:"foreignKey:UserID"`
+	Username  string `json:"username" binding:"required"`
+	Password  string `json:"password" binding:"required"`
+	Email     string `json:"email" binding:"required"`
+	FirstName string `json:"first_name" binding:"required"`
+	LastName  string `json:"last_name" binding:"required"`
 }
 
 func Register(c *gin.Context) {
@@ -81,6 +80,7 @@ func Register(c *gin.Context) {
 	u.Email = input.Email
 	u.FirstName = input.FirstName
 	u.LastName = input.LastName
+	u.ImageSrc = "avatars/default.jpg"
 
 	_, err := u.SaveUser()
 	if err != nil {

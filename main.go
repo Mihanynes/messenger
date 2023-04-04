@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
 	"schedule/controllers"
-	"schedule/middlewares"
 	"schedule/models"
 )
 
@@ -20,30 +19,15 @@ func main() {
 	public.POST("/register", controllers.Register)
 	public.POST("/login", controllers.Login)
 
-	protected := r.Group("/admin")
-	protected.Use(middlewares.JwtAuthMiddleware())
-	protected.GET("/user", controllers.CurrentUser)
+	users := r.Group("/users")
+	users.POST("/findUsers", controllers.FindUsers)
 
-	projects := r.Group("/projects")
-	projects.POST("/create", controllers.CreateProject)
-	projects.GET("/getUserProjects/:user_id", controllers.GetUserProjects)
-	projects.GET("/getProjectById/:project_id", controllers.GetProjectById)
-	projects.PATCH("/updateInformation", controllers.UpdateInformation)
+	chats := r.Group("/chats")
+	chats.POST("/create", controllers.CreateChat)
 
-	columns := r.Group("/columns")
-	columns.POST("/create", controllers.CreateColumn)
-	columns.PATCH("/update", controllers.UpdateColumn)
-
-	sections := r.Group("/sections")
-	sections.POST("/create", controllers.CreateSection)
-	sections.PATCH("/update", controllers.UpdateSection)
-
-	textPoints := r.Group("/textPoints")
-	textPoints.PATCH("/update", controllers.UpdateTextPoint)
-
-	tasks := r.Group("/tasks")
-	tasks.POST("/createEmpty", controllers.CreateEmptyTask)
-	tasks.PATCH("/update", controllers.UpdateTask)
+	messages := r.Group("/messages")
+	messages.POST("/create", controllers.CreateMessage)
+	messages.PATCH("/update", controllers.UpdateMessage)
 
 	r.Run(":8080")
 
