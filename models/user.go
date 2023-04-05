@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"html"
 	"strings"
 
@@ -97,10 +98,29 @@ func (u *User) BeforeSave() error {
 func FindUser(username string) ([]User, error) {
 
 	var users []User
-
 	if err := DB.Where("username LIKE ?", username+"%").Find(&users); err != nil {
 		return users, err.Error
 	}
 	// Убрать пароли у каждого юзера
 	return users, nil
+}
+
+func FindOneUser(username string) (User, error) {
+
+	var user User
+	if err := DB.Where(User{Username: username}).Find(&user); err != nil {
+		return user, err.Error
+	}
+	// Убрать пароли у каждого юзера
+	return user, nil
+}
+
+func (u *User) GetAllUserChats() ([]Chat, error) {
+	var chats []Chat
+	fmt.Println(u.ID)
+	err := DB.Where(&Chat{FirstUserID: u.ID}).Or(&Chat{SecondUserID: u.ID}).Find(&chats)
+	if err != nil {
+		return chats, err.Error
+	}
+	return chats, nil
 }

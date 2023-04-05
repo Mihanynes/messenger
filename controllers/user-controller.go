@@ -11,7 +11,6 @@ type FindUsersInput struct {
 }
 
 func FindUsers(c *gin.Context) {
-
 	var input FindUsersInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -23,4 +22,25 @@ func FindUsers(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"users": users})
+}
+
+func GetAllUserChats(c *gin.Context) {
+	var input FindUsersInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := models.FindOneUser(input.Username)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	chats, err := user.GetAllUserChats()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"user_chats": chats})
 }

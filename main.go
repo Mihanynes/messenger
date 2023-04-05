@@ -21,9 +21,11 @@ func main() {
 
 	users := r.Group("/users")
 	users.POST("/findUsers", controllers.FindUsers)
+	users.GET("/user_chats", controllers.GetAllUserChats)
 
 	chats := r.Group("/chats")
 	chats.POST("/create", controllers.CreateChat)
+	chats.GET("/all_messages", controllers.GetAllMessagesFromChat)
 
 	messages := r.Group("/messages")
 	messages.POST("/create", controllers.CreateMessage)
