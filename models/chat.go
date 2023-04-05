@@ -6,9 +6,8 @@ import (
 
 type Chat struct {
 	gorm.Model
-	FirstUserID  uint   `gorm:"not null" json:"first_user_id"`
-	SecondUserID uint   `gorm:"not null" json:"second_user_id"`
-	LastMessage  string `gorm:"size:255;not null;default: ' '" json:"last_message"`
+	FirstUserID  uint `gorm:"not null" json:"first_user_id"`
+	SecondUserID uint `gorm:"not null" json:"second_user_id"`
 }
 
 func (chat *Chat) Create() (*Chat, error) {
@@ -40,4 +39,13 @@ func (chat *Chat) GetAllMessages() ([]Message, error) {
 		return messages, err.Error
 	}
 	return messages, nil
+}
+
+func (chat *Chat) GetLastMessage() (Message, error) {
+	var message Message
+	err := DB.Where(&Message{ChatID: chat.ID}).Last(&message)
+	if err != nil {
+		return message, err.Error
+	}
+	return message, nil
 }

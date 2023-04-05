@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"html"
 	"strings"
 
@@ -113,14 +112,4 @@ func FindOneUser(username string) (User, error) {
 	}
 	// Убрать пароли у каждого юзера
 	return user, nil
-}
-
-func (u *User) GetAllUserChats() ([]Chat, error) {
-	var chats []Chat
-	fmt.Println(u.ID)
-	err := DB.Where(&Chat{FirstUserID: u.ID}).Or(&Chat{SecondUserID: u.ID}).Find(&chats)
-	if err != nil {
-		return chats, err.Error
-	}
-	return chats, nil
 }

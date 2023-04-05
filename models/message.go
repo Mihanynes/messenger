@@ -14,12 +14,6 @@ func (message *Message) Create() (*Message, error) {
 	if err != nil {
 		return message, err
 	}
-
-	var chat Chat
-	DB.First(&chat, message.ChatID)
-	if err := DB.Model(&chat).Update("last_message", message.Text).Error; err != nil {
-		return message, err
-	}
 	return message, nil
 }
 

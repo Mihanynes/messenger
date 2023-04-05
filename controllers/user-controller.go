@@ -25,12 +25,11 @@ func FindUsers(c *gin.Context) {
 }
 
 func GetAllUserChats(c *gin.Context) {
-	var input FindUsersInput
+	var input models.User
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 	user, err := models.FindOneUser(input.Username)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -43,4 +42,25 @@ func GetAllUserChats(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"user_chats": chats})
+}
+
+func GetUserLastMessages(c *gin.Context) {
+	var input models.User
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	user, err := models.FindOneUser(input.Username)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	//var chatIcons []models.ChatIcon
+	ChatIcons, err := user.GetLastMessages()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"user_last_messages": ChatIcons})
 }
