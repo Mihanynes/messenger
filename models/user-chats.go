@@ -10,12 +10,10 @@ func (u *User) GetAllUserChats() ([]Chat, error) {
 }
 
 type ChatIcon struct {
-	user    User
-	chat    Chat
-	message Message
+	User    User
+	Chat    Chat
+	Message Message
 }
-
-//работает, но не корректо вовзращает json
 
 func (u *User) GetLastMessages() ([]ChatIcon, error) {
 	var chatIcons []ChatIcon
@@ -25,7 +23,6 @@ func (u *User) GetLastMessages() ([]ChatIcon, error) {
 		var _user User
 		if chat.FirstUserID != u.ID {
 			_user, err = GetUserByID(chat.FirstUserID)
-
 		} else {
 			_user, err = GetUserByID(chat.SecondUserID)
 		}

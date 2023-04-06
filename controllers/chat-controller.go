@@ -12,8 +12,7 @@ func CreateChat(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	chat, err := (&input).FindChat(input.FirstUserID, input.SecondUserID)
-	//chat, err := (&input).Create()
+	chat, err := (&input).FindChat()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -27,8 +26,7 @@ func GetAllMessagesFromChat(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	chat, err0 := (&input).FindChat(input.FirstUserID, input.SecondUserID)
+	chat, err0 := (&input).FindChat()
 	if err0 != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err0.Error()})
 		return

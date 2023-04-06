@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"schedule/models"
+	"schedule/utils/token"
 )
 
 type FindUsersInput struct {
@@ -25,12 +26,8 @@ func FindUsers(c *gin.Context) {
 }
 
 func GetAllUserChats(c *gin.Context) {
-	var input models.User
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	user, err := models.FindOneUser(input.Username)
+
+	user, err := CurrentUser(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -45,12 +42,8 @@ func GetAllUserChats(c *gin.Context) {
 }
 
 func GetUserLastMessages(c *gin.Context) {
-	var input models.User
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	user, err := models.FindOneUser(input.Username)
+
+	user, err := CurrentUser(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -63,4 +56,22 @@ func GetUserLastMessages(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"user_last_messages": ChatIcons})
+}
+
+func CurrentUser(c *gin.Context) (models.User, error) {
+
+	user_id, err := token.ExtractTokenID(c)
+
+	if err != nil {
+		return models.User{}, nil
+	}
+
+	u, err := models.GetUserByID(user_id)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return models.User{}, nil
+	}
+
+	return u, err
 }

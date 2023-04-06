@@ -18,13 +18,11 @@ func (chat *Chat) Create() (*Chat, error) {
 	return chat, nil
 }
 
-func (chat *Chat) FindChat(first_user uint, second_user uint) (*Chat, error) {
-	if first_user > second_user {
-		tmp := first_user
-		first_user = second_user
-		second_user = tmp
+func (chat *Chat) FindChat() (*Chat, error) {
+	if chat.FirstUserID > chat.SecondUserID {
+		chat.FirstUserID, chat.SecondUserID = chat.SecondUserID, chat.FirstUserID
 	}
-	err := DB.Where(&Chat{FirstUserID: first_user, SecondUserID: second_user}).First(&chat)
+	err := DB.Where(&Chat{FirstUserID: chat.FirstUserID, SecondUserID: chat.SecondUserID}).First(&chat).Error
 	if err != nil {
 		chat.Create()
 		return chat, nil
