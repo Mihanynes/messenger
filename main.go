@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
 	"schedule/controllers"
+	"schedule/middlewares"
 	"schedule/models"
 )
 
@@ -18,6 +19,10 @@ func main() {
 	public := r.Group("/")
 	public.POST("/register", controllers.Register)
 	public.POST("/login", controllers.Login)
+
+	protected := r.Group("/admin")
+	protected.Use(middlewares.JwtAuthMiddleware())
+	protected.GET("/user", controllers.CurrentU)
 
 	users := r.Group("/users")
 	users.POST("/findUsers", controllers.FindUsers)

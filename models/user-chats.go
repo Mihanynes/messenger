@@ -10,9 +10,9 @@ func (u *User) GetAllUserChats() ([]Chat, error) {
 }
 
 type ChatIcon struct {
-	User    User
-	Chat    Chat
-	Message Message
+	User    User    `json:"user"`
+	Chat    Chat    `json:"chat"`
+	Message Message `json:"message"`
 }
 
 func (u *User) GetLastMessages() ([]ChatIcon, error) {
