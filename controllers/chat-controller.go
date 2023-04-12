@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"schedule/models"
+	"schedule/utils/token"
 )
 
 func CreateChat(c *gin.Context) {
@@ -21,21 +22,19 @@ func CreateChat(c *gin.Context) {
 }
 
 func GetAllMessagesFromChat(c *gin.Context) {
-	var input models.Chat
-	if err := c.ShouldBindJSON(&input); err != nil {
+	var chat models.Chat
+	if err := c.ShouldBindJSON(&chat); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	chat, err0 := (&input).FindChat()
-	if err0 != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err0.Error()})
-		return
-	}
-	allMessages, err := chat.GetAllMessages()
 
+	allMessages, err := chat.GetAllMessages()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"all_messages": allMessages})
+
+	user_id, err := token.ExtractTokenID(c)
+
+	c.JSON(http.StatusOK, gin.H{"all_messages": allMessages, "user_id": user_id})
 }
