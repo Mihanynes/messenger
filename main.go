@@ -1,42 +1,70 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	cors "github.com/rs/cors/wrapper/gin"
+	"net/http"
 	"schedule/controllers"
 	"schedule/middlewares"
 	"schedule/models"
 )
 
+var wsupgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
+func wshandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := wsupgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println("Failed to set websocket upgrade: %+v", err)
+		return
+	}
+
+	for {
+		t, msg, err := conn.ReadMessage()
+		if err != nil {
+			break
+		}
+		conn.WriteMessage(t, msg)
+	}
+}
+
 func main() {
 
 	models.ConnectDataBase()
 
-	r := gin.Default()
-	r.Use(cors.AllowAll())
-	r.Static("/static", "./static")
+	router := gin.Default()
+	router.Use(cors.AllowAll())
+	router.Static("/static", "./static")
 
-	public := r.Group("/")
+	router.GET("/ws", func(c *gin.Context) {
+		wshandler(c.Writer, c.Request)
+	})
+
+	public := router.Group("/")
 	public.POST("/register", controllers.Register)
 	public.POST("/login", controllers.Login)
 
-	protected := r.Group("/admin")
+	protected := router.Group("/admin")
 	protected.Use(middlewares.JwtAuthMiddleware())
 	protected.GET("/user", controllers.CurrentU)
 
-	users := r.Group("/users")
+	users := router.Group("/users")
 	users.POST("/findUsers", controllers.FindUsers)
 	users.GET("/user_chats", controllers.GetAllUserChats)
-	users.GET("/user_last_messages", controllers.GetUserLastMessages)
+	users.GET("/{user_last_messages}", controllers.GetUserLastMessages)
 
-	chats := r.Group("/chats")
+	chats := router.Group("/chats")
 	chats.POST("/create", controllers.CreateChat)
 	chats.POST("/all_messages", controllers.GetAllMessagesFromChat)
 
-	messages := r.Group("/messages")
+	messages := router.Group("/messages")
 	messages.POST("/create", controllers.CreateMessage)
 	messages.PATCH("/update", controllers.UpdateMessage)
 
-	r.Run(":8080")
+	router.Run(":8080")
 
 }

@@ -1,5 +1,7 @@
 package models
 
+import "github.com/jinzhu/gorm"
+
 func (u *User) GetAllUserChats() ([]Chat, error) {
 	var chats []Chat
 	err := DB.Where(&Chat{FirstUserID: u.ID}).Or(&Chat{SecondUserID: u.ID}).Find(&chats)
@@ -10,25 +12,29 @@ func (u *User) GetAllUserChats() ([]Chat, error) {
 }
 
 type ChatIcon struct {
-	User    User    `json:"user"`
-	Chat    Chat    `json:"chat"`
-	Message Message `json:"message"`
+	gorm.Model
+	user    User    `gorm:"not null" json:"user"`
+	chat    Chat    `gorm:"not null" json:"chat"`
+	message Message `gorm:"not null" json:"message"`
 }
+
+//работает, но не корректо вовзращает json
 
 func (u *User) GetLastMessages() ([]ChatIcon, error) {
 	var chatIcons []ChatIcon
-	chatIcons = nil
 	chats, err := u.GetAllUserChats()
 	for _, chat := range chats {
-		var _user User
+		var user User
 		if chat.FirstUserID != u.ID {
-			_user, err = GetUserByID(chat.FirstUserID)
+			user, err = GetUserByID(chat.FirstUserID)
+
 		} else {
-			_user, err = GetUserByID(chat.SecondUserID)
+			user, err = GetUserByID(chat.SecondUserID)
 		}
-		_chat := chat
-		_message, _ := chat.GetLastMessage()
-		chatIcon := ChatIcon{_user, _chat, _message}
+		var chatIcon ChatIcon
+		chatIcon.user = user
+		chatIcon.chat = chat
+		chatIcon.message, _ = chat.GetLastMessage()
 		chatIcons = append(chatIcons, chatIcon)
 	}
 	if err != nil {
