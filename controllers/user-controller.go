@@ -49,7 +49,6 @@ func GetUserLastMessages(c *gin.Context) {
 		return
 	}
 
-	//var chatIcons []models.ChatIcon
 	ChatIcons, err := user.GetLastMessages()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -60,13 +59,13 @@ func GetUserLastMessages(c *gin.Context) {
 
 func CurrentUser(c *gin.Context) (models.User, error) {
 
-	user_id, err := token.ExtractTokenID(c)
+	userId, err := token.ExtractTokenID(c)
 
 	if err != nil {
 		return models.User{}, nil
 	}
 
-	u, err := models.GetUserByID(user_id)
+	u, err := models.GetUserByID(userId)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
