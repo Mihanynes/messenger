@@ -113,3 +113,10 @@ func FindOneUser(username string) (User, error) {
 	// Убрать пароли у каждого юзера
 	return user, nil
 }
+
+func (u *User) UpdatePhoto(imageSrc string) (*User, error) {
+	if err := DB.Model(&u).Update("image_src", imageSrc).Error; err != nil {
+		return u, err
+	}
+	return u, nil
+}

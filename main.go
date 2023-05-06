@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -16,20 +17,72 @@ var wsupgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func wshandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := wsupgrader.Upgrade(w, r, nil)
+type UserConn struct {
+	UserId uint `json:"user_id"`
+}
+
+type ClientsChats struct {
+	CompanionID uint            `json:"companion_id"`
+	Connection  *websocket.Conn `json:"connection"`
+}
+
+var clients = make(map[uint]*websocket.Conn)
+var clientsChats = make(map[uint]ClientsChats)
+
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+	connection, err := wsupgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Println("Failed to set websocket upgrade: %+v", err)
 		return
 	}
+	_, message, _ := connection.ReadMessage()
+	var input UserConn
+	json.Unmarshal(message, &input)
+	clients[input.UserId] = connection
+}
 
-	for {
-		t, msg, err := conn.ReadMessage()
-		if err != nil {
-			break
-		}
-		conn.WriteMessage(t, msg)
+type MessageSend struct {
+	UserId  uint           `json:"user_id"`
+	Message models.Message `json:"message"`
+}
+
+func wsSendMessage(w http.ResponseWriter, r *http.Request) {
+	connection, err := wsupgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println("Failed to set websocket upgrade: %+v", err)
+		return
 	}
+	_, message, _ := connection.ReadMessage()
+	var input MessageSend
+	json.Unmarshal(message, &input)
+	if val, ok := clients[input.UserId]; ok {
+		obj, _ := json.Marshal(input.Message)
+		val.WriteMessage(websocket.TextMessage, obj)
+	}
+	val, ok := clientsChats[input.UserId]
+	fmt.Println(val)
+	if ok && val.CompanionID == input.Message.SenderID {
+		obj, _ := json.Marshal(input.Message)
+		fmt.Println(obj)
+		val.Connection.WriteMessage(websocket.TextMessage, obj)
+	}
+}
+
+type GetMessage struct {
+	UserID      uint `json:"user_id"`
+	CompanionId uint `json:"companion_id"`
+}
+
+func wsGetMessage(w http.ResponseWriter, r *http.Request) {
+	connection, err := wsupgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Println("Failed to set websocket upgrade: %+v", err)
+		return
+	}
+	_, message, _ := connection.ReadMessage()
+	var input GetMessage
+	json.Unmarshal(message, &input)
+	clientsChats[input.UserID] = ClientsChats{CompanionID: input.CompanionId, Connection: connection}
 }
 
 func main() {
@@ -41,7 +94,15 @@ func main() {
 	router.Static("/static", "./static")
 
 	router.GET("/ws", func(c *gin.Context) {
-		wshandler(c.Writer, c.Request)
+		wsHandler(c.Writer, c.Request)
+	})
+
+	router.GET("/ws/sendMessage", func(c *gin.Context) {
+		wsSendMessage(c.Writer, c.Request)
+	})
+
+	router.GET("/ws/getMessage", func(c *gin.Context) {
+		wsGetMessage(c.Writer, c.Request)
 	})
 
 	public := router.Group("/")
@@ -55,7 +116,9 @@ func main() {
 	users := router.Group("/users")
 	users.POST("/findUsers", controllers.FindUsers)
 	users.GET("/user_chats", controllers.GetAllUserChats)
-	users.GET("/{user_last_messages}", controllers.GetUserLastMessages)
+	users.GET("/user_last_messages", controllers.GetUserLastMessages)
+	users.GET("/getUser", controllers.GetUser)
+	users.POST("/savePhoto", controllers.SavePhoto)
 
 	chats := router.Group("/chats")
 	chats.POST("/create", controllers.CreateChat)

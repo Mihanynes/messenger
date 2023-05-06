@@ -13,9 +13,9 @@ func (u *User) GetAllUserChats() ([]Chat, error) {
 
 type ChatIcon struct {
 	gorm.Model
-	user    User    `gorm:"not null" json:"user"`
-	chat    Chat    `gorm:"not null" json:"chat"`
-	message Message `gorm:"not null" json:"message"`
+	User    User    `gorm:"not null" json:"user"`
+	Chat    Chat    `gorm:"not null" json:"chat"`
+	Message Message `gorm:"not null" json:"message"`
 }
 
 //работает, но не корректо вовзращает json
@@ -32,9 +32,9 @@ func (u *User) GetLastMessages() ([]ChatIcon, error) {
 			user, err = GetUserByID(chat.SecondUserID)
 		}
 		var chatIcon ChatIcon
-		chatIcon.user = user
-		chatIcon.chat = chat
-		chatIcon.message, _ = chat.GetLastMessage()
+		chatIcon.User = user
+		chatIcon.Chat = chat
+		chatIcon.Message, _ = chat.GetLastMessage()
 		chatIcons = append(chatIcons, chatIcon)
 	}
 	if err != nil {

@@ -7,13 +7,21 @@ import (
 	"schedule/utils/token"
 )
 
+type CreateChatInput struct {
+	UserId uint `json:"user_id"`
+}
+
 func CreateChat(c *gin.Context) {
-	var input models.Chat
+	var input CreateChatInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	chat, err := (&input).FindChat()
+
+	user, err := CurrentUser(c)
+
+	chat, err := (&models.Chat{FirstUserID: user.ID, SecondUserID: input.UserId}).FindChat()
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

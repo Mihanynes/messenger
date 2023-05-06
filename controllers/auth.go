@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"schedule/models"
@@ -50,6 +51,7 @@ func Register(c *gin.Context) {
 	var input RegisterInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
+		fmt.Println("Здесь 2")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -65,6 +67,7 @@ func Register(c *gin.Context) {
 
 	_, err := u.SaveUser()
 	if err != nil {
+		fmt.Println("Здесь 1")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
