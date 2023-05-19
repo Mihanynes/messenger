@@ -1,4 +1,4 @@
-# project-manager
-Backend for project-manager 
+# messenger
+Backend for messenger 
 
-Frontend: https://github.com/grifondopala/schedule
+Frontend: https://github.com/grifondopala/messanger
