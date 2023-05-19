@@ -60,10 +60,8 @@ func wsSendMessage(w http.ResponseWriter, r *http.Request) {
 		val.WriteMessage(websocket.TextMessage, obj)
 	}
 	val, ok := clientsChats[input.UserId]
-	fmt.Println(val)
 	if ok && val.CompanionID == input.Message.SenderID {
 		obj, _ := json.Marshal(input.Message)
-		fmt.Println(obj)
 		val.Connection.WriteMessage(websocket.TextMessage, obj)
 	}
 }
@@ -82,6 +80,7 @@ func wsGetMessage(w http.ResponseWriter, r *http.Request) {
 	_, message, _ := connection.ReadMessage()
 	var input GetMessage
 	json.Unmarshal(message, &input)
+	fmt.Println(input.UserID, input.CompanionId)
 	clientsChats[input.UserID] = ClientsChats{CompanionID: input.CompanionId, Connection: connection}
 }
 
